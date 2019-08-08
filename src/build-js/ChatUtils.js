@@ -1,4 +1,5 @@
-/* global window bigInt */
+import bigInt from 'big-integer';
+/* global window */
 // Begin general utils
 export function isValidBase64Triplet(iv, hmac, ciphertext) {
   if(/^[0-9A-Za-z+/]{22}[=]{0,2}$/.test(iv)) {
