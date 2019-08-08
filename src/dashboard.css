@@ -65,11 +65,11 @@
   width: 0 !important;
   min-width: 0 !important;
   margin: 0 !important;
+  text-overflow: clip !important;
 }
 
 .transition---all {
   transition: all .3s cubic-bezier(.4,0,.2,1), min-width 1ms;
-  text-overflow: clip !important;
 }
 
 .mw-194 {
