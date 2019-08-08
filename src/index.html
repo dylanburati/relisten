@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, minimal-ui">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.0/dist/vuetify.min.css" rel="stylesheet">
+  <link href="/dashboard.css" rel="stylesheet">
+  <title>Relisten</title>
+</head>
+<body>
+  <div style="position: fixed; left: -10000px">
+    <p style="font-family: Roboto">Loading</p>
+    <p style="font-family: 'Material Icons'">Loading</p>
+  </div>
+  <div id="app">
+    <v-app>
+      <v-toolbar height="56px" fixed dark v-bind:style="toolbarStyleObj">
+        <v-toolbar-side-icon aria-label="Toggle sidebar" v-bind:style="{ visibility: fontsReady ? 'visible' : 'hidden' }"
+                v-on:click="toggleSidebar"></v-toolbar-side-icon>
+        <v-toolbar-title class="transition---all mr-3 text-white"
+            v-bind:class="{'fade-and-shrink': toolbarTitleShrink, 'mw-194': toolbarTitleFixed}">
+          {{ title }}
+        </v-toolbar-title>
+        <v-layout v-if="true" id="navbar-search" pl-2 pt-2>
+          <v-autocomplete ref="navbar-searchbar" v-bind:items="searchResults"
+              v-model="searchSelect" item-value="href"
+              v-bind:search-input.sync="searchTerm"
+              no-filter hide-no-data
+              append-icon="" placeholder="Search" background-color="#113E62" flat aria-label="Search"
+              v-bind:menu-props="{ 'contentClass': 'navbar-search-results' }">
+            <template v-slot:item="props">
+              <v-list-tile-content class="flex-11" v-text="props.item.text">
+              </v-list-tile-content>
+              <!-- <v-list-tile-action v-if="(props.item.conn_type) && (props.item.conn_type & 13 != null) == 0">
+                <v-btn icon color="#3BBCFC" v-on:click.stop.prevent="searchFollow(props.item.href)">
+                  <v-icon>mdi-account-plus</v-icon>
+                </v-btn>
+              </v-list-tile-action>
+              <v-list-tile-action v-if="(props.item.conn_type) && (props.item.conn_type & 13 != null) == 1">
+                <v-btn icon color="#54E897" v-on:click.stop.prevent="searchUnfollow(props.item.href)">
+                  <v-icon>mdi-account-check</v-icon>
+                </v-btn>
+              </v-list-tile-action> -->
+            </template>
+          </v-autocomplete>
+        </v-layout>
+        <v-spacer v-else></v-spacer>
+        <v-menu transition="slide-y-reverse-transition" bottom left nudge-bottom="32px">
+          <v-btn aria-label="More" slot="activator" icon><v-icon v-if="fontsReady">more_vert</v-icon></v-btn>
+          <ul class="navbar-dropdown">
+            <nav-link right v-for="(item, n) in moreLinks"
+                    v-bind:linkdata="item" v-bind:key="n" v-bind:handler="item.action">
+            </nav-link> 
+          </ul>
+        </v-menu>
+      </v-toolbar>
+      <v-navigation-drawer app ref="sidebar" id="sidebar"
+              style="z-index: 100; padding-top: 64px">
+        <v--sidebar
+            v-bind:valid-user="validUser" v-bind:fonts-ready="fontsReady" v-bind:user-name="userName"
+            v-bind:session-loader="chatSessionLoader"></v--sidebar>
+      </v-navigation-drawer>
+      <v-content>
+        <router-view style="padding-top: 64px"
+            v-bind:valid-user="validUser" v-bind:fonts-ready="fontsReady" v-bind:user-name="userName"
+            v-bind:session-loader="chatSessionLoader"
+            v-on:update:title="title = $event"
+            v-on:update:search-extension="searchExtension = $event"></router-view>
+      </v-content>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-router@3.0.7/dist/vue-router.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.0/dist/vuetify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@0.6.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@1.0.9/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/big-integer@1.6.36/BigInteger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.1/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.17.0/dist/vuedraggable.min.js"></script>
+  <script src="/js/util.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/sheetdefs.js"></script>
+  <script src="/views/Dashboard.js"></script>
+  <script src="/views/Sidebar.js"></script>
+  <script src="/views/Chat.js"></script>
+  <script src="/views/Sheet.js"></script>
+  <script src="/views/BrowseTopics.js"></script>
+  <script src="/views/Topic.js"></script>
+  <script src="/views/ImportSheet.js"></script>
+  <script src="/views/UserProfile.js"></script>
+  <script type="text/javascript">
+    /* global window document Vue axios */
+    const router = new VueRouter({
+      mode: 'history',
+      routes: [
+        {
+          path: '/dashboard',
+          name: 'dashboard',
+          component: __dashboard
+        },
+        {
+          path: '/chat/:activeChat',
+          name: 'chat',
+          props: (route) => ({
+            activeChat: parseInt(route.params.activeChat, 10)
+          }),
+          component: __chat
+        },
+        {
+          path: '/sheet/:sheetId',
+          name: 'sheet',
+          props: (route) => ({
+            newSheet: false,
+            sheetId: parseInt(route.params.sheetId, 10)
+          }),
+          component: __sheet
+        },
+        {
+          path: '/sheet/new/:requestCategory',
+          name: 'sheetNew',
+          props: (route) => ({
+            newSheet: true,
+            requestCategory: parseInt(route.params.requestCategory, 10)
+          }),
+          component: __sheet
+        },
+        {
+          path: '/browse',
+          name: 'browseTopics',
+          component: __browseTopics
+        },
+        {
+          path: '/topic/:topicId',
+          name: 'topic',
+          props: (route) => ({
+            topicId: parseInt(route.params.topicId, 10)
+          }),
+          component: __topic
+        },
+        {
+          path: '/topic/:topicId/:requestUsername',
+          name: 'topicSubmission',
+          props: (route) => ({
+            topicId: parseInt(route.params.topicId, 10),
+            requestUsername: route.params.requestUsername
+          }),
+          component: __topic
+        },
+        {
+          path: '/import',
+          name: 'importSheet',
+          component: __importSheet
+        },
+        {
+          path: '/user/:pageUsername',
+          name: 'userProfile',
+          props: true,
+          component: __userProfile
+        },
+        {
+          path: '/error/:errorCode',
+          name: 'errorPage',
+          props: (route) => ({
+            errorCode: parseInt(route.params.errorCode, 10)
+          }),
+          component: __errorPage
+        },
+        {
+          path: '*',
+          name: 'errorPageNotFound',
+          props: {
+            errorCode: 404
+          },
+          component: __errorPage
+        }
+      ]
+    });
+
+    const csl = new ChatSessionLoader(
+      axios.post('/backend-chat.php', { command: 'join' }).
+        then((response) => response.data.data)
+    );
+
+    var vm = new Vue({
+      el: '#app',
+      router: router,
+      data: {
+        validUser: false,
+        userName: '',
+        migrate: false,
+        fontsReady: false,
+        chatSessionLoader: csl,
+        // ----- //
+        title: 'Dashboard',
+        toolbarStyleObj: {
+          'background-color': '#01579B',
+          'z-index': 130
+        },
+        searchResults: [],
+        searchLoading: false,
+        searchTerm: '',
+        searchExtension: () => false,
+        searchSelect: ''
+      },
+      computed: {
+        moreLinks: function() {
+          let _ml = [];
+          if(!this.validUser) {
+            _ml.push({ href: '/register.php', text: 'Register', noRouter: true });
+            _ml.push({ href: '/login.php', text: 'Login', noRouter: true });
+          } else {
+            _ml.push({ href: '', text: 'Sign out', action: signout }); 
+          }
+          // _ml.push({ href: '/help', text: 'Help' });
+          return _ml;
+        },
+        toolbarTitleShrink: function() {
+          if(this.$vuetify.breakpoint.mdAndDown) {
+            if(this.$refs['navbar-searchbar'] != null && this.$refs['navbar-searchbar'].isFocused) {
+              return true;
+            }
+          }
+          return false;
+        },
+        toolbarTitleFixed: function() {
+          return !this.$vuetify.breakpoint.mdAndDown;
+        }
+      },
+      watch: {
+        searchTerm: function(v) {
+          if(v == null || v === '') {
+            this.searchResults = [];
+            return;
+          }
+          if(this.searchExtension(v) === true) {
+            this.searchTerm = '';
+            return;
+          }
+          debounce.invoke(this.getSearchResults, [v, this.searchResults], 100);
+        },
+        searchSelect: function(v) {
+          if(v != null && v !== '') {
+            this.$router.push(v);
+          }
+        }
+      },
+      methods: {
+        empty: empty,
+        print: e => { console.log(e); },
+        toggleSidebar: function(evt) {
+          const sidebar = this.$refs['sidebar'];
+          if(sidebar !== undefined && sidebar !== null) {
+            sidebar.isActive = !sidebar.isActive;
+          }
+        },
+        getToolbarTitleClasses: function() {
+          let arr;
+          return arr;
+        },
+        searchFollow: function(userHref) {
+          const aIdx = this.searchResults.findIndex(e => (e.href === userHref));
+          const sIdx = userHref.indexOf('user/');
+          if(sIdx === -1 || sIdx === (userHref.length - 5)) {
+            return;
+          }
+          const username = userHref.substring(sIdx + 5);
+          doUserFollow(username, 'follow').then(row => {
+            console.log('row', row);
+            if(aIdx !== -1 && this.searchResults[aIdx].href === userHref) {
+              this.searchResults[aIdx].conn_type = row.conn_type;
+            }
+          });
+        },
+        searchUnfollow: function(userHref) {
+          const aIdx = this.searchResults.findIndex(e => (e.href === userHref));
+          const sIdx = userHref.indexOf('user/');
+          if(sIdx === -1 || sIdx === (userHref.length - 5)) {
+            return;
+          }
+          const username = userHref.substring(sIdx + 5);
+          doUserFollow(username, 'unfollow').then(row => {
+            if(aIdx !== -1 && this.searchResults[aIdx].href === userHref) {
+              this.searchResults[aIdx].conn_type = row.conn_type;
+            }
+          });
+        },
+        getSearchResults: function(q, resultsRef) {
+          axios.post('/backend-search.php', { search: true, q: q })
+            .then(function(response) {
+              if(Array.isArray(response.data.data)) {
+                resultsRef.splice(0, resultsRef.length);
+                response.data.data.forEach(row => {
+                  const searchResult = Object.assign({}, row, { text: row.result, n: resultsRef.length });
+                  resultsRef.push(searchResult);
+                });
+              }
+            });
+        }
+      },
+      created: function() {
+        this.$router.afterEach((to, from) => {
+          this.searchTerm = '';
+        });
+        axios.post('/backend-status.php', {}).
+          then((response) => {
+            if(response.data != null) {
+              this.validUser = response.data.validUser;
+              this.userName = response.data.userName;
+            }
+          });
+      },
+      mounted: function() {
+        if((document.fonts != null) && typeof document.fonts.ready.then === 'function') {
+          document.fonts.ready.then(() => {
+            this.fontsReady = true;
+          });
+        } else {
+          sleep(1500).then(() => {
+            // Force icon render even if fonts aren't loaded
+            this.fontsReady = true;
+          });
+        }
+      }
+    });
+
+    function relistenCreate(privacy) {
+      const toSend = { title: 'Relisten', category: 32769, sheetData: [], create: true };
+      const toSend2 = { topic: 'Relisten', category: 32769, sheetData: [], sheetPrivacy: privacy };
+      axios.post('/backend-save.php', toSend)
+        .then(function(response) {
+          console.log(response.data);
+          if(response.data != null && response.data.id > 0) {
+            toSend2.sheetId = response.data.id;
+            axios.post('/backend-submit.php', toSend2)
+              .then(function(response2) {
+                if(response2.data.finalize === true) {
+                  window.location = `/sheet/${toSend2.sheetId}`;
+                }
+              });
+          }
+        });
+    }
+  </script>
+</body>
+</html>

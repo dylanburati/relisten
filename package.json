@@ -1,0 +1,25 @@
+{
+  "name": "relisten",
+  "version": "1.0.0",
+  "description": "A customizable, social platform for keeping track of music you like.",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-loader": "^8.0.6",
+    "copy-descriptor": "^0.1.1",
+    "core-js": "^3.1.4",
+    "core-js-pure": "^3.1.4",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint": "^6.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "webpack-cli": "^3.3.6",
+    "webpack": "^4.39.1"
+  },
+  "scripts": {
+  },
+  "keywords": [
+    "music",
+    "social"
+  ],
+  "author": "Dylan Burati",
+  "license": "MIT"
+}

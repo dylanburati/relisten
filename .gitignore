@@ -1,0 +1,8 @@
+/.ignored/
+/.vscode/
+/dist/
+/node_modules/
+/package-lock.json
+rsync.sh
+.eslintrc.js
+/src/backend-*.php
