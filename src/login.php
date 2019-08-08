@@ -63,7 +63,7 @@ if(!empty($_SESSION['user'])) {
               <a href="#">Contact</a>
             </li>
             <li>
-              <a href="/about.php">About us</a>
+              <a href="/about.html">About us</a>
             </li>
             <li>
               <a href="/help.php">Support</a>
