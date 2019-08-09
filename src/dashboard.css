@@ -43,8 +43,8 @@
   padding: 0 !important;
 }
 
-#sidebar .chat-tile.active {
-  background-color: #EAEBEC;
+#sidebar .chat-tile.router-link-active {
+  background-color: #E5E9EB;
 }
 
 #sidebar .chat-tile {

@@ -22,7 +22,7 @@
             v-bind:class="{'fade-and-shrink': toolbarTitleShrink, 'mw-194': toolbarTitleFixed}">
           {{ title }}
         </v-toolbar-title>
-        <v-layout v-if="true" id="navbar-search" pl-2 pt-2>
+        <v-layout id="navbar-search" pl-2 pt-2>
           <v-autocomplete ref="navbar-searchbar" v-bind:items="searchResults"
               v-model="searchSelect" item-value="href"
               v-bind:search-input.sync="searchTerm"
@@ -45,7 +45,7 @@
             </template>
           </v-autocomplete>
         </v-layout>
-        <v-spacer v-else></v-spacer>
+        <div style="flex: 0.1 1 auto; max-width: 64px"></div>
         <v-menu transition="slide-y-reverse-transition" bottom left nudge-bottom="32px">
           <v-btn aria-label="More" slot="activator" icon><v-icon v-if="fontsReady">more_vert</v-icon></v-btn>
           <ul class="navbar-dropdown">

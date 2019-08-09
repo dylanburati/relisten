@@ -79,6 +79,24 @@ function loadBookmarks(vm) {
     });
 }
 
+function stringSequenceEquals(arr1, arr2) {
+  if(arr1.length !== arr2.length) {
+    return false;
+  }
+  const hash = {};
+  for(let i = 0; i < arr1.length; i++) {
+    if(hash[arr1[i]] === undefined) {
+      hash[arr1[i]] = 0;
+    }
+    if(hash[arr2[i]] === undefined) {
+      hash[arr2[i]] = 0;
+    }
+    hash[arr1[i]] += 1;
+    hash[arr2[i]] -= 1;
+  }
+  return (Object.values(hash).filter(e => e !== 0).length === 0);
+}
+
 Vue.component('v--sidebar', {
   template: template``,
   name: 'v--sidebar',
@@ -98,7 +116,7 @@ Vue.component('v--sidebar', {
       dialogSearchTerm: '',
       dialog: false,
       dialogSelectUsers: [],
-      dialogInputState: 0,
+      dialogInputState: 0
     }
   },
   computed: {
@@ -160,7 +178,11 @@ Vue.component('v--sidebar', {
           const allItems = [];
           if(Array.isArray(response.data.data)) {
             response.data.data.forEach(row => {
-              const searchResult = Object.assign({}, row, { text: row.result, hadQuery: q });
+              const searchResult = Object.assign({}, row, {
+                text: row.result,
+                value: row.result.substring(1),
+                hadQuery: q
+              });
               allItems.push(searchResult);
             });
           }
@@ -202,7 +224,7 @@ Vue.component('v--sidebar', {
         return;
       }
       if(Array.isArray(this.dialogSelectUsers)) {
-        this.sessionLoader.session.enqueue('conversation_request ' + this.dialogSelectUsers.map(u => u.substring(1)).join(';'), 0);
+        this.sessionLoader.session.enqueue('conversation_request ' + this.dialogSelectUsers.join(';'), 0);
         this.dialogSearchDisabled = true;
       }
     },
@@ -214,29 +236,13 @@ Vue.component('v--sidebar', {
       this.dialogSelectUsers = [];
       this.dialogSearchDisabled = false;
       if(id > 0) {
-        // this.activeChat = id;
-        const conversationCreated = this.sessionLoader.session.conversations.find(e => e.id === id);
-        // this.groupChatActive = conversationCreated.users.length > 2;
-        // this.activeChatTitle = usersToTitle(conversationCreated.users);
-        // this.getVisibleMessages(1);
-        // if(vm.$vuetify.breakpoint.mdAndDown) {
-        //   vm.toggleSidebar();
-        // }
-        // vm.$refs['sidebar-links'].forEach(comp => {
-        //   comp.active = (comp.linkdata.id === vm.activeChat);
-        // });
+        this.$router.push(`/chat/${id}`)
       }
     },
     conversation_ls: function(conversation) {
       if(this.dialog && Array.isArray(this.dialogSelectUsers)) {
-        let isRequestedConv = true;
-        conversation.users.forEach(u => {
-          if(isRequestedConv) {
-            isRequestedConv = (u === vm.userName ||
-              vm.dialogSelectUsers.findIndex(u2 => (u === u2.substring(1))) > -1);
-          }
-        });
-        if(isRequestedConv) {
+        const expectedUsers = [this.userName].concat(this.dialogSelectUsers);
+        if(stringSequenceEquals(expectedUsers, conversation.users)) {
           this.endConversationCreate(conversation.id);
         }
       }
