@@ -125,7 +125,7 @@ var __chat = Vue.component('chat', {
   },
   watch: {
     activeChat: function(v) {
-      this.getVisibleMessages(0);
+      this.getVisibleMessages(1);
     }
   },
   methods: {
@@ -150,11 +150,11 @@ var __chat = Vue.component('chat', {
           data: this.messageHtml(sortedMessages[i])
         });
         this.visibleMessages.push(vMsgObj);
-        // if(scroll === 1) {
-        //   debounce.invoke(this.panelScrollFull, [], 100);
-        // } else if(scroll === 2) {
-        //   debounce.invoke(this.panelScrollMostRecentMsgTop, [], 100);
-        // }
+        if(scroll === 1) {
+          debounce.invoke(this.panelScrollFull, [], 100);
+        } else if(scroll === 2) {
+          debounce.invoke(this.panelScrollFull, [], 100);
+        }
       }
     },
     messageHtml: function(msgObj) {
@@ -180,6 +180,12 @@ var __chat = Vue.component('chat', {
         }
       });
     },
+    panelScrollFull: function() {
+      const panel = document.getElementById('message-container');
+      if(panel != null) {
+        panel.scroll(0, panel.scrollHeight - panel.clientHeight);
+      }
+    },
 
     conversation_cat: function(conversation, msgObj) {
       this.getVisibleMessages(1);
@@ -196,9 +202,9 @@ var __chat = Vue.component('chat', {
     this.sessionLoader.ready.then(session => {
       session.externalMessageHandlers.conversation_cat = this.conversation_cat.bind(this);
       session.externalMessageHandlers.set_preferences = this.set_preferences.bind(this);
-      session.externalMessageHandlers.user_message = this.set_preferences.bind(this);
+      session.externalMessageHandlers.user_message = this.user_message.bind(this);
       this.chatSetPreferences();
-      this.getVisibleMessages(0);
+      this.getVisibleMessages(1);
     }, errorMsg => 0);
   }
 })
