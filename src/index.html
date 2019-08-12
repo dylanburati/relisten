@@ -297,19 +297,23 @@
                 });
               }
             });
+        },
+        statusCheck: function() {
+          axios.post('/backend-status.php', {})
+            .then((response) => {
+              if(response.data != null) {
+                this.validUser = response.data.validUser;
+                this.userName = response.data.userName;
+              }
+          });
         }
       },
       created: function() {
         this.$router.afterEach((to, from) => {
           this.searchTerm = '';
+          this.statusCheck();
         });
-        axios.post('/backend-status.php', {}).
-          then((response) => {
-            if(response.data != null) {
-              this.validUser = response.data.validUser;
-              this.userName = response.data.userName;
-            }
-          });
+        this.statusCheck();
       },
       mounted: function() {
         if((document.fonts != null) && typeof document.fonts.ready.then === 'function') {

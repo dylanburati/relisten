@@ -420,6 +420,7 @@ function loadSheetContent(vm) {
       if(response.data.error != null) {
         vm.$router.push('/error/2');
       }
+      vm.sheetRows = [];
       vm.sheetCategory = response.data.category;
       vm.sheetUtil = sheetDefinitions[response.data.category];
 

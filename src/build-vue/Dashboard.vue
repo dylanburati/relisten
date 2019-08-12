@@ -151,14 +151,7 @@ function loadSheets(vm) {
             }
             vm.relistenContributors[e.username] += 1;
           });
-          if(vm.userName in vm.relistenContributors) {
-            vm.selectUserRelisten = vm.userName;
-            vm.$nextTick(() => {
-              if(vm.$refs['relisten-searchbar'] != null) {
-                vm.$refs['relisten-searchbar'].selectedItems = [{ text: '@' + vm.userName, value: vm.userName }];
-              }
-            });
-          }
+          vm.forceRelistenSelect(vm.userName);
         }
 
         vm.lsReturned = true;
@@ -263,6 +256,9 @@ var __dashboard = Vue.component('dashboard', {
     }
   },
   watch: {
+    userName: function(v) {
+      this.forceRelistenSelect(v);
+    },
     doRelistenContributorSearch: function(v) {
       this.relistenContributorsDialog = this.getRelistenContributorSearchResults(v);
     },
@@ -310,6 +306,16 @@ var __dashboard = Vue.component('dashboard', {
     toggleSelected: function(item) {
       item.selected = !item.selected;
       this.sheetsSelectedCount += (item.selected ? 1 : -1);
+    },
+    forceRelistenSelect: function(v) {
+      if(v in this.relistenContributors) {
+        this.selectUserRelisten = v;
+        this.$nextTick(() => {
+          if(this.$refs['relisten-searchbar'] != null) {
+            this.$refs['relisten-searchbar'].selectedItems = [{ text: '@' + v, value: v }];
+          }
+        });
+      }
     }
   },
   created: function() {
