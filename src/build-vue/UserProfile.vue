@@ -199,11 +199,11 @@ function loadProfile(vm) {
         };
         vm.userFollow = Object.assign(defaultData, response.data);
 
-        if(Array.isArray(response.data.user_sheets)) {
-          response.data.user_sheets.forEach(row => {
+        if(Array.isArray(response.data.sheets)) {
+          response.data.sheets.forEach(row => {
             const rowObj = {
               id: row.topic_id,
-              topic: row.topic,
+              topic: row.name,
               date: getRelativeTimeString(row.mtime),
               href: `/topic/${row.topic_id}/${vm.pageUsername}`
             };

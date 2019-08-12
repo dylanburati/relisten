@@ -64,7 +64,7 @@
 <script>
 function loadBookmarks(vm) {
   vm.browseTopics.splice(1);  // keep "View all"
-  axios.post('/backend-ls.php', { page: 'bookmarks' })
+  axios.post('/backend-ls.php', { what: 'bookmarks' })
     .then((response) => {
       if(typeof response.data === 'object') {
         if(Array.isArray(response.data.bookmarks)) {
@@ -178,11 +178,7 @@ Vue.component('v--sidebar', {
           const allItems = [];
           if(Array.isArray(response.data.data)) {
             response.data.data.forEach(row => {
-              const searchResult = Object.assign({}, row, {
-                text: row.result,
-                value: row.result.substring(1),
-                hadQuery: q
-              });
+              const searchResult = Object.assign({}, row, { hadQuery: q });
               allItems.push(searchResult);
             });
           }

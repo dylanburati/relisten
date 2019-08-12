@@ -228,7 +228,7 @@ var __sheet = Vue.component('sheet', {
               if(row.category !== this.sheetCategory) {
                 return;
               }
-              const searchResult = Object.assign({}, row, { text: row.result, n: resultsRef.length });
+              const searchResult = Object.assign({}, row, { n: resultsRef.length });
               resultsRef.push(searchResult);
             });
           }
@@ -304,7 +304,7 @@ var __sheet = Vue.component('sheet', {
           console.log(response.data);
           if(!empty(response.data, 'object') && response.data.id > 0) {
             if(this.sheetId !== response.data.id) {
-              this.$router.push(response.data.id);
+              this.$router.push(`/sheet/${response.data.id}`);
             }
           }
           this.endSheetSave();
@@ -317,7 +317,7 @@ var __sheet = Vue.component('sheet', {
       if(this.sheetPrivacy == null || !(this.sheetId >= 0)) {
         return false;
       }
-      const privacy = this.sheetPrivacy.value;
+      const privacy = this.sheetPrivacy;
       const serializedSheetRows = this.sheetRows.map(e => e.values);
       const finalizedSheetRows = finalizeData(this);
       const toSend1 = {
@@ -344,6 +344,9 @@ var __sheet = Vue.component('sheet', {
           axios.post('/backend-submit.php', toSend2)
             .then((response) => {
               console.log(response.data);
+              if(!empty(response.data, 'object') && response.data.finalize === true) {
+                this.submitOnSave = toSend2.topic;
+              }
               this.endSheetSave();
               this.endSheetSubmit();
             });

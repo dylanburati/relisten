@@ -225,7 +225,7 @@ function doUserFollow(username, verb) {
   return new Promise(function(resolve, reject) {
     axios.post('/backend-follow.php', { action: verb, other_user: username })
       .then(function(response) {
-        const modifiedRow = response.data.find(e => (e.user2 === username));
+        const modifiedRow = response.data.find(e => (e.username === username));
         resolve(modifiedRow);
       });
   });

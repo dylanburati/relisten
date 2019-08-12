@@ -32,7 +32,7 @@
           </td>
           <template v-for="(column, i) in sheetsHeaders">
           <td v-if="column.value !== 'selected'" v-text="props.item[column.value]" v-bind:key="i"
-              v-bind:class="{'text-xs-right': (column.align == 'right')}"></td>
+              v-bind:class="{'text-xs-right': (column.align === 'right')}"></td>
           </template>
         </tr>
       </template>
@@ -42,7 +42,7 @@
     <v-layout d-flex align-center class="mt-5 mb-2" v-if="validUser">
       <h1 class="flex-01 mr-2 font-weight-regular" style="font-size: 28px;">Relisten</h1>
       <v-btn flat v-if="fontsReady && relistenVisibleItems.length > 0" v-on:click="getVisibleRowsRelisten"
-              aria-label="Refresh items" color="primary" class="flex-01 btn-dense px-2" id="relisten-refresh">
+              aria-label="Refresh items" color="primary" class="flex-01 btn-dense px-2 mr-2" id="relisten-refresh">
         <v-icon class="icon-sm">
           refresh
         </v-icon>
@@ -78,11 +78,13 @@
             v-bind:headers="relistenHeaders" v-bind:items="relistenVisibleItems"
             :hide-actions="true" class="datatable">
       <template v-slot:items="props">
-        <td><v-checkbox class="pa-0 ma-0" hide-details
-                v-model="props.item.selected" v-on:change="relistenSelectedCount += (props.item.selected ? 1 : -1)"></v-checkbox></td>
-        <template v-for="(column, i) in relistenHeaders">
-        <td v-if="column.value !== 'selected'" v-text="props.item[column.value]" v-bind:key="i"
-                v-bind:class="{'text-xs-right': (column.align == 'right')}"></td>
+        <td>
+          <v-checkbox class="pa-0 ma-0" hide-details
+              v-model="props.item.selected" v-on:change="relistenSelectedCount += (props.item.selected ? 1 : -1)">
+          </v-checkbox>
+        </td>
+        <template v-for="col in relistenColumns">
+          <td v-if="col.disp" v-text="props.item.values[col.n]" v-bind:key="col.n"></td>
         </template>
       </template>
     </v-data-table>
@@ -105,46 +107,58 @@ function loadCategories(vm) {
 }
 
 function loadSheets(vm) {
-  axios.post('/backend-ls.php', { page: 'dashboard-main' })
+  axios.post('/backend-ls.php', { what: 'sheets relisten' })
     .then((response) => {
+      vm.lsReturned = false;
       vm.sheetsItems = [];
       vm.sheetsDisplay = false;
       vm.relistenItems = [];
       vm.relistenDisplay = false;
+      vm.sheetsSelectedCount = 0;
       if(typeof response.data === 'object') {
-        if(typeof response.data.data_sheets === 'object') {
+        if(Array.isArray(response.data.sheets)) {
           let _sheetsItems = [];
-          Object.values(response.data.data_sheets).forEach(item => {
+          response.data.sheets.forEach(item => {
             const row = Object.assign({}, item, {
               date: getRelativeTimeString(item.mtime),
               href: `/sheet/${item.id}`,
               selected: false
             });
-            if(row.topic == null || row.topic === '') {
+            if(item.submitted == null) {
               row.topic = '\u2014';
-            } else if(row.topic === 'Relisten') {
-              vm.relistenId = row.id;
+            } else {
+              row.topic = item.submitted.name;
             }
             _sheetsItems.push(row);
           });
           vm.sheetsItems = _sheetsItems.sort((a, b) => b.mtime - a.mtime);
-          vm.sheetsDisplay = (Object.values(response.data.data_sheets).length > 0);
+          vm.sheetsDisplay = (response.data.sheets.length > 0);
         }
 
-        if(response.data.data_relisten != null) {
-          vm.relistenDisplay = (response.data.data_relisten.length > 0);
-          vm.relistenItems = response.data.data_relisten;
-          response.data.data_relisten.forEach(e => {
-            vm.relistenContributors[e.username] = e.data.length;
-            if(e.username === vm.userName) {
-              vm.selectUserRelisten = e.username;
+        if(response.data.relisten != null) {
+          const _relistenItems = response.data.relisten.data;
+          _relistenItems.forEach(e => {
+            e.values = vm.relistenUtil.validateRow(e.values);
+          });
+          vm.relistenItems = _relistenItems.filter(e => e.values !== false);
+          vm.relistenDisplay = (vm.relistenItems.length > 0);
+          if(response.data.relisten.submitted_sheet != null) {
+            vm.relistenId = response.data.relisten.submitted_sheet;
+          }
+          response.data.relisten.data.forEach(e => {
+            if(vm.relistenContributors[e.username] === undefined) {
+              vm.relistenContributors[e.username] = 0;
             }
+            vm.relistenContributors[e.username] += 1;
+          });
+          if(vm.userName in vm.relistenContributors) {
+            vm.selectUserRelisten = vm.userName;
             vm.$nextTick(() => {
               if(vm.$refs['relisten-searchbar'] != null) {
-                vm.$refs['relisten-searchbar'].selectedItems = [{ text: '@' + e.username, value: e.username }];
+                vm.$refs['relisten-searchbar'].selectedItems = [{ text: '@' + vm.userName, value: vm.userName }];
               }
             });
-          });
+          }
         }
 
         vm.lsReturned = true;
@@ -209,24 +223,8 @@ var __dashboard = Vue.component('dashboard', {
       relistenId: -1,
       relistenContributors: {},
       relistenContributorsDialog: [],
-      relistenColumns: [
-        {
-          field: 'music',
-          dtype: 's'
-        },
-        {
-          field: 'comments',
-          dtype: 's'
-        },
-        {
-          field: 'weight',
-          dtype: 'f'
-        },
-        {
-          field: 'count',
-          dtype: 'i'
-        }
-      ],
+      relistenUtil: sheetDefinitions[32769],
+      relistenColumns: sheetDefinitions[32769].columns,
       relistenHeaders: [
         {
           text: '',
@@ -297,47 +295,15 @@ var __dashboard = Vue.component('dashboard', {
       return userList;
     },
     getVisibleRowsRelisten: function() {
-      const userData = this.relistenItems.find(e => (e.username === this.selectUserRelisten));
-      if(userData == null) return;
-      const availRows = userData.data.map(e => {
-        const row = { num: e.num, selected: false };
-        this.relistenColumns.forEach((col, i) => {
-          switch(col.dtype) {
-            case 's':
-              if(empty(e.values[i])) {
-                row[col.field] = '';
-              } else {
-                row[col.field] = e.values[i];
-              }
-              break;
-            case 'i':
-              if(!empty(e.values[i], 'number')) {
-                row[col.field] = e.values[i];
-              } else {
-                e.values[i] = parseInt(e.values[i]);
-                if(!Number.isNaN(e.values[i])) {
-                  row[col.field] = e.values[i];
-                }
-              }
-              break;
-            case 'f':
-              if(!empty(e.values[i], 'number')) {
-                row[col.field] = e.values[i];
-              } else {
-                e.values[i] = parseFloat(e.values[i]);
-                if(!Number.isNaN(e.values[i])) {
-                  row[col.field] = e.values[i];
-                }
-              }
-              break;
-          }
-        });
-        return row;
+      const userItems = this.relistenItems.filter(e => (e.username === this.selectUserRelisten));
+      const availRows = userItems.map(row => {
+        return Object.assign({}, row, { selected: false });
       });
       if(availRows.length <= 5) {
         this.relistenVisibleItems = availRows;
       } else {
-        const useRows = randomizeWeighted(availRows, availRows.map(e => e.weight), 5);
+        const weightCol = this.relistenColumns.findIndex(e => (e.field === 'weight'));
+        const useRows = randomizeWeighted(availRows, availRows.map(e => e.values[weightCol]), 5);
         this.relistenVisibleItems = useRows;
       }
     },

@@ -1,4 +1,4 @@
-/* begin sidebar */
+/* begin Sidebar */
 #sidebar .nav-link {
   font-size: 1rem;
   text-decoration: none !important;
@@ -59,76 +59,12 @@
   padding-left: 0;
 }
 
-/* begin navbar */
-.fade-and-shrink {
-  color: transparent !important;
-  width: 0 !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  text-overflow: clip !important;
-}
-
-.transition---all {
-  transition: all .3s cubic-bezier(.4,0,.2,1), min-width 1ms;
-}
-
-.mw-194 {
-  width: 194px;
-  min-width: 194px;
-}
-
-#navbar-search .v-select__slot {
-  padding: .25rem 1rem;
-}
-
-.navbar-search-results .v-list__tile {
-  padding: .375rem 1rem;
-  height: unset !important;
-  align-items: baseline !important;
-  justify-content: space-between !important;
-  font-size: 1rem !important;
-}
-
-.navbar-search-results .v-btn--icon::before {
-  border-radius: .25rem !important;
-}
-
-.navbar-search-results .v-btn--icon {
-  border-radius: .25rem !important;
-  width: calc(24px + .25rem);
-  height: calc(24px + .25rem);
-  transform: translateY(3px);
-}
-
-.v-text-field > .v-input__control > .v-input__slot::after,
-.v-text-field > .v-input__control > .v-input__slot::before {
-  height: 0 !important;
-  border: none !important
-}
-
-.navbar-dropdown {
-  display: -ms-flexbox;
-  display: flex;
-  ms-flex-direction: column;
-  flex-direction: column;
-  background-color: white;
-  padding: .5rem 0 .5rem 0;
-  text-align: right;
-  min-width: 150px;
-}
-
-.navbar-dropdown .nav-link {
-  font-size: 1rem;
-  color: #333;
-  text-decoration: none !important;
-}
-
-.navbar-dropdown li:focus,
-.navbar-dropdown li:hover {
-  background-color: #ECEFF1;
-}
-
 /* begin general */
+.anchor {
+  float: left;
+  transform: translateY(-80px);
+}
+
 .flex-01 {
   -webkit-flex-grow: 0 !important;
   -ms-flex: 0 !important;
@@ -250,11 +186,76 @@ code:before, code:after {
   padding-top: 0 !important;
 }
 
-/* begin dashboard.php */
-#relisten-refresh {
-  margin-right: 8px !important;
+/* begin index */
+.fade-and-shrink {
+  color: transparent !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  text-overflow: clip !important;
 }
 
+.transition---all {
+  transition: all .3s cubic-bezier(.4,0,.2,1), min-width 1ms;
+}
+
+.mw-194 {
+  width: 194px;
+  min-width: 194px;
+}
+
+#navbar-search .v-select__slot {
+  padding: .25rem 1rem;
+}
+
+.navbar-search-results .v-list__tile {
+  padding: .375rem 1rem;
+  height: unset !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  font-size: 1rem !important;
+}
+
+.navbar-search-results .v-btn--icon::before {
+  border-radius: .25rem !important;
+}
+
+.navbar-search-results .v-btn--icon {
+  border-radius: .25rem !important;
+  width: calc(24px + .25rem);
+  height: calc(24px + .25rem);
+  transform: translateY(3px);
+}
+
+.v-text-field > .v-input__control > .v-input__slot::after,
+.v-text-field > .v-input__control > .v-input__slot::before {
+  height: 0 !important;
+  border: none !important
+}
+
+.navbar-dropdown {
+  display: -ms-flexbox;
+  display: flex;
+  ms-flex-direction: column;
+  flex-direction: column;
+  background-color: white;
+  padding: .5rem 0 .5rem 0;
+  text-align: right;
+  min-width: 150px;
+}
+
+.navbar-dropdown .nav-link {
+  font-size: 1rem;
+  color: #333;
+  text-decoration: none !important;
+}
+
+.navbar-dropdown li:focus,
+.navbar-dropdown li:hover {
+  background-color: #ECEFF1;
+}
+
+/* begin Chat */
 #chat-container {
   display: -ms-flexbox;
   display: flex;
@@ -318,10 +319,6 @@ code:before, code:after {
   margin-top: .2rem;
 }
 
-.message-left * {
-  /* color: white; */
-}
-
 .message-right * {
   color: white;
 }
@@ -382,13 +379,7 @@ code:before, code:after {
   display: none;
 }
 
-/* begin help.php */
-.anchor {
-  float: left;
-  transform: translateY(-80px);
-}
-
-/* begin sheet.php */
+/* begin Sheet */
 .border-radius-l0 {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -469,12 +460,12 @@ code:before, code:after {
   width: 100%;
 }
 
-/* begin import.php */
+/* begin ImportSheet */
 #import-textarea-container div {
   height: 100%;
 }
 
-/* begin topic.php */
+/* begin Topic */
 #topic-header .v-toolbar__content,
 #topic-header .v-toolbar__extension {
   padding-left: 0 !important;
@@ -490,7 +481,7 @@ code:before, code:after {
   border-left: 1px solid #CFD8DC !important;
 }
 
-/* begin browse.php */
+/* begin BrowseTopics */
 .v-card__actions > .d-flex > .v-dialog__container {
   text-align: center !important;
 }
@@ -499,3 +490,5 @@ code:before, code:after {
   display: flex !important;
   justify-content: center;
 }
+
+/* begin UserProfile */

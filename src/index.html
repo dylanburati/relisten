@@ -292,7 +292,7 @@
               if(Array.isArray(response.data.data)) {
                 resultsRef.splice(0, resultsRef.length);
                 response.data.data.forEach(row => {
-                  const searchResult = Object.assign({}, row, { text: row.result, n: resultsRef.length });
+                  const searchResult = Object.assign({}, row, { n: resultsRef.length });
                   resultsRef.push(searchResult);
                 });
               }

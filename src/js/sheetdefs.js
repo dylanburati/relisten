@@ -242,10 +242,12 @@ sheetDefinitions[32769] = {
       return false;
     }
     if(typeof arr[2] !== 'number') {
-      arr[2] = 1;
+      const dec = parseInt(arr[2], 10);
+      arr[2] = (Number.isFinite(dec) ? dec : 1);
     }
     if(typeof arr[3] !== 'number') {
-      arr[3] = 0;
+      const dec = parseInt(arr[3], 10);
+      arr[3] = (Number.isFinite(dec) ? dec : 0);
     }
     return arr;
   },

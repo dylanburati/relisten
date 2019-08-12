@@ -18,7 +18,8 @@
         <v-progress-circular indeterminate v-if="loading" class="flex-01" color="primary" style="width: 20px; margin: 0 10px;">
         </v-progress-circular>
         <v-icon v-else-if="rowState === 2" class="mx-2 flex-01" color="#4CAF50">check</v-icon>
-        <v-icon v-else class="mx-2 flex-01" color="#FDD835">warning</v-icon>
+        <v-icon v-else-if="!allBlank()" class="mx-2 flex-01" color="#FDD835">warning</v-icon>
+        <div v-else class="flex-01" style="width: 40px"> </div>
       </template>
     </v-card>
     <v-layout d-flex v-if="focused && Array.isArray(rowdata.matches) && rowdata.matches.length > 0 && rowState < 2" class="mb-3">

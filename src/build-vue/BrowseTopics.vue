@@ -145,23 +145,23 @@ var __browseTopics = Vue.component('browse-topics', {
 });
 
 function loadTopics(vm) {
-  axios.post('/backend-ls.php', { page: 'browse-main' })
+  axios.post('/backend-ls.php', { what: 'topics' })
     .then(function(response) {
       console.log(response.data);
       vm.topics = [];
-      if(response.data.data != null) {
-        Object.keys(response.data.data).forEach(function(n) {
+      if(Array.isArray(response.data.topics)) {
+        response.data.topics.forEach(row => {
           const topic = {
-            id: response.data.data[n].topic_id,
-            href: `/topic/${response.data.data[n].topic_id}`,
-            name: response.data.data[n].name,
-            category: response.data.data[n].category,
-            categoryTitle: sheetDefinitions[response.data.data[n].category].title,
-            description: response.data.data[n].description,
-            bookmarked: response.data.data[n].bookmarked,
+            id: row.topic_id,
+            href: `/topic/${row.topic_id}`,
+            name: row.name,
+            category: row.category,
+            categoryTitle: sheetDefinitions[row.category].title,
+            description: row.description,
+            bookmarked: row.bookmarked,
             sheetCount: {
-              total: response.data.data[n].total,
-              following: response.data.data[n].following
+              total: row.total,
+              following: row.following
             }
           };
           vm.topics.push(topic);
