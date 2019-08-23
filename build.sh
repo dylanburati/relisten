@@ -20,8 +20,8 @@ else
 fi
 
 if [ -z "$SKIP_WEBPACK" ]; then
-    WEBPACK_MODE="development"
-    [[ " $@ " =~ ' --prod ' ]] && WEBPACK_MODE="production"
+    WEBPACK_MODE="production"
+    [[ " $@ " =~ ' --dev ' ]] && WEBPACK_MODE="development"
     mkdir -p dist/js
     ./node_modules/.bin/webpack --mode $WEBPACK_MODE --target web
     echo
