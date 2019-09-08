@@ -56,6 +56,7 @@
           v-bind:search="sheetSearchSync"
           v-bind:show-indicator="typeof sheetUtil.makeQuery === 'function'"
           v-bind:validator="sheetUtil.getRowState"
+          v-bind:invalidator="sheetUtil.resetRowState"
           ref="sheet-rows" class="sheet-row">
       </sheet-row>
     </draggable>

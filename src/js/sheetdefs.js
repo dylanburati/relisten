@@ -96,6 +96,9 @@ sheetDefinitions[0] = {
   getRowState: function(arr) {
     return solrGetIdState(arr[2]);
   },
+  resetRowState: function(arr) {
+    arr[2] = '';
+  },
   validateRow: function(arr) {
     if(!Array.isArray(arr) || typeof arr[0] !== 'string' || typeof arr[1] !== 'string') {
       return false;
@@ -194,6 +197,9 @@ sheetDefinitions[32768] = {
   getRowState: function(arr) {
     return 0;
   },
+  resetRowState: function(arr) {
+    return;
+  },
   validateRow: function(arr) {
     return arr;
   },
@@ -237,8 +243,19 @@ sheetDefinitions[32769] = {
   getRowState: function() {
     return 0;
   },
+  resetRowState: function() {
+    if(typeof arr[2] === 'number') {
+      arr[2] = 1;
+    }
+    if(typeof arr[3] === 'number') {
+      arr[3] = 0;
+    }
+  },
   validateRow: function(arr) {
     if(!Array.isArray(arr) || typeof arr[0] !== 'string' || typeof arr[1] !== 'string') {
+      return false;
+    }
+    if(arr[0] === '' && arr[1] === '') {
       return false;
     }
     if(typeof arr[2] !== 'number') {

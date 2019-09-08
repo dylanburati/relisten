@@ -52,8 +52,10 @@ Vue.component('sheet-row', {
       required: true
     },
     validator: {
-      type: Function,
-      default: () => 0
+      type: Function
+    },
+    invalidator: {
+      type: Function
     },
     search: {
       type: Function
@@ -67,7 +69,9 @@ Vue.component('sheet-row', {
   data: function() {
     return {
       focused: false,
+      focusChangeCounter: 0,
       rowState: 0,
+      searchCounter: 0,
       loading: false
     };
   },
@@ -86,10 +90,15 @@ Vue.component('sheet-row', {
   methods: {
     empty: empty,
     setFocused: function(nextVal) {
+      this.focusChangeCounter++;
       if(nextVal === false) {
+        const fc = this.focusChangeCounter;
         const rv = this.rowdata.values;
         const waiter = n => {
-          if(n === 0 || this.rowdata.values !== rv) {
+          if(this.focusChangeCounter !== fc || this.rowdata.values !== rv) {
+            return;
+          }
+          if(n === 0) {
             this.focused = nextVal;
             return;
           }
@@ -105,7 +114,11 @@ Vue.component('sheet-row', {
     selectMatch: function(match) {
       const _values = this.rowdata.values.slice();
       this.sheetCols.forEach(col => {
-        _values[col.n] = match.values[col.field][0];
+        if(col.field === 'id') {
+          _values[col.n] = match.values[col.field];  // singular
+        } else {
+          _values[col.n] = match.values[col.field][0];
+        }
       });
       this.rowdata.values = _values;
       this.rowState = this.validator(this.rowdata.values);
@@ -117,6 +130,8 @@ Vue.component('sheet-row', {
     },
     trySearch: function(editCol) {
       // values changed
+      const sc = ++this.searchCounter;
+      this.invalidator(this.rowdata.values);
       this.rowState = 0;
       if(this.allBlank()) {
         this.rowdata.matches = [];
@@ -125,8 +140,10 @@ Vue.component('sheet-row', {
       if(typeof this.search === 'function') {
         this.loading = true;
         this.search(this.rowdata, docs => {
-          this.rowdata.matches = docs;
-          this.loading = false;
+          if(this.searchCounter === sc) {
+            this.rowdata.matches = docs;
+            this.loading = false;
+          }
         });
       }
     }
