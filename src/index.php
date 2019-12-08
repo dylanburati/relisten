@@ -141,10 +141,10 @@ if(!empty($_SESSION['user'])) {
                 <div class="p-2 mx-3 my-2" style="background-color: aliceblue;">
                   <div class="mb-1 d-table" style="width: 100%; height: 64px;">
                     <div class="table-cell-center">
-                      <img alt="Apache SOLR logo" width="64" src="https://lucene.apache.org/solr/assets/images/logo.svg" style="background-color: #d9411e;">
+                      <img alt="Apache Solr logo" width="64" src="https://lucene.apache.org/solr/assets/images/logo.svg" style="background-color: #d9411e;">
                     </div>
                   </div>
-                  <a class="text-xs text-secondary" href="https://vuetifyjs.com" rel="noopener noreferrer">Apache SOLR</a>
+                  <a class="text-xs text-secondary" href="https://vuetifyjs.com" rel="noopener noreferrer">Apache Solr</a>
                 </div>
               </div>
             </div>

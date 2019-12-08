@@ -6,7 +6,9 @@
               class="mr-1 grey--text text--darken-1 icon-sm">
         edit
       </v-icon>
-      <h2 v-if="!saving" class="headline pr-2" id="sheet-title" v-text="(!empty(sheetTitle, 'string') ? sheetTitle : 'New sheet')">New sheet</h2>
+      <h2 v-if="!saving" class="headline pr-2" id="sheet-title">
+         {{ (sheetTitle != null ? sheetTitle : 'New sheet') + (hasUnsavedChanges ? '*' : '') }}
+      </h2>
       <v-text-field v-if="saving" v-model="sheetTitle" prepend-icon="cancel" @click:prepend="endSheetSave"
             autofocus solo hide-details label="Title" color="grey darken-1" style="max-width: 480px;">
       </v-text-field>
@@ -155,7 +157,8 @@ var __sheet = Vue.component('sheet', {
       chunkSize: 50,
       sheetRows: [],
       sheetCols: [],
-      sheetUtil: null
+      sheetUtil: null,
+      hasUnsavedChanges: false
     }
   },
   computed: {
@@ -247,6 +250,7 @@ var __sheet = Vue.component('sheet', {
           this.sheetRows[i].num = i + 1;
         }
       }
+      this.hasUnsavedChanges = (this.hasUnsavedChanges || curr !== prev);
     },
     dropSheetRows: function(startIdx, endIdx) {
       let _sheetRows = this.sheetRows.slice();
@@ -254,6 +258,7 @@ var __sheet = Vue.component('sheet', {
       _sheetRows.splice(startIdx, dropLen);
       _sheetRows = _sheetRows.map((e, i) => Object.assign({}, e, { num: i + 1 }));
       this.sheetRows = _sheetRows;
+      this.hasUnsavedChanges = true;
     },
     appendSheetRows: function(n) {
       let _sheetRows = this.sheetRows.slice();
@@ -267,12 +272,14 @@ var __sheet = Vue.component('sheet', {
         _sheetRows.push(rowObj);
       }
       this.sheetRows = _sheetRows;
+      this.hasUnsavedChanges = true;
     },
     randomizeSheetRows: function(startIdx, endIdx) {
       let toRandomize = this.sheetRows.slice(startIdx, endIdx + 1);
       let useRows = randomizeUnweighted(toRandomize);
       useRows = useRows.map((e, i) => Object.assign({}, e, { num: startIdx + i + 1 }));
       this.sheetRows = this.sheetRows.slice(0, startIdx).concat(useRows).concat(this.sheetRows.slice(endIdx + 1));
+      this.hasUnsavedChanges = true;
     },
     startSheetSave: function(rename) {
       if(!rename && !empty(this.sheetTitle, 'string') && this.sheetTitle !== 'New sheet') {
@@ -304,6 +311,7 @@ var __sheet = Vue.component('sheet', {
         .then((response) => {
           console.log(response.data);
           if(!empty(response.data, 'object') && response.data.id > 0) {
+            this.hasUnsavedChanges = false;
             if(this.sheetId !== response.data.id) {
               this.$router.push(`/sheet/${response.data.id}`);
             }
@@ -340,6 +348,7 @@ var __sheet = Vue.component('sheet', {
           if(!empty(response.data, 'object') && response.data.id > 0) {
             this.sheetId = response.data.id;
             toSend2.sheetId = response.data.id;
+            this.hasUnsavedChanges = false;
           }
 
           axios.post('/backend-submit.php', toSend2)
@@ -362,6 +371,7 @@ var __sheet = Vue.component('sheet', {
         const qData = this.sheetUtil.makeQuery(rowdata.values);
         throttle.invoke(this.sheetSearch, [qData, callback], 300);
       }
+      this.hasUnsavedChanges = true;
     },
     sheetSearch: function(qData, callback) {
       axios.post("/backend-verify.php", qData)
