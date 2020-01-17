@@ -35,6 +35,9 @@
             </p>
           </div>
         </div>
+        <div class="hero-inner p-3 pb-5">
+          <table></table>
+        </div>
       </div>
     </main>
 
@@ -63,32 +66,55 @@
   </div>
   <script src="/js/util.js"></script>
   <script type="text/javascript">
-    function successOrError(fn, success) {
-      try {
-        fn();
-        return success;
-      } catch(error) {
-        return error;
-      }
+    function make(tag, opts) {
+      const el = document.createElement(tag);
+      el.className = opts.class || '';
+      el.textContent = opts.text || '';
+      el.href = opts.href || '';
+      (opts.children || []).forEach(child => el.appendChild(child));
+      return el;
+    }
+
+    function tableRow(cells) {
+      return make('tr', {
+        children: cells.map(c =>
+          make('td',
+            (typeof c === 'string') ?
+                { text: c } :
+                { children: [c] }
+          )
+        )
+      });
+    }
+
+    function table() {
+      Array.from(document.querySelector('table').children).forEach(e => e.remove());
+
+      fetch('/backend-links.php')
+        .then(response => response.json())
+        .then(json => {
+          if(Array.isArray(json.links)) {
+            document.querySelector('table').appendChild(
+              make('tbody', {
+                children: json.links.map(linkObj =>
+                  tableRow([
+                    make('a', { href: linkObj.href, text: linkObj.text }),
+                    getRelativeTimeString(linkObj.mtime)
+                  ])
+                )
+              })
+            )
+          }
+        });
     }
 
     document.querySelector("code").textContent = getRelativeTimeString(Date.now() / 1000);
+
     sleep(1000).then(function() {
       document.querySelector("code").textContent += "\nPromises \u2714";
       sleep(1000).then(() => {
         document.querySelector("code").textContent += "\nArrow functions \u2714";;
-      sleep(1000).then(() => {
-        document.querySelector("code").textContent += '\n' + successOrError(
-          () => { const t = 0; let e = 1; }, "const and let \u2714");
-      sleep(1000).then(() => {
-        document.querySelector("code").textContent += '\n' + successOrError(
-          () => { Object.assign({}, { t: 3 }); }, "Object.assign \u2714");
-      sleep(1000).then(() => {
-        document.querySelector("code").textContent += '\n' + successOrError(
-          () => { const [t, e] = [1, 2]; }, "Array destructuring \u2714");
-      });
-      });
-      });
+        sleep(1000).then(() => table());
       });
     });
   </script>
